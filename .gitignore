@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build and packaging output
+dist/
+dist-ssr/
+release/
+out/
+coverage/
+*.dmg
+*.zip
+*.blockmap
+build/icon.iconset/
+build/icon-1024.png
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+.cache
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
