@@ -2,7 +2,7 @@
   "name": "coros-sync",
   "productName": "COROS Sync",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Sync Spotify playlists to a COROS watch.",
   "type": "module",
   "main": "electron/main.mjs",
