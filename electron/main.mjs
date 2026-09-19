@@ -1,9 +1,12 @@
 import { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } from 'electron'
 import { createHash, randomBytes } from 'node:crypto'
 import { createServer } from 'node:http'
-import { access, cp, mkdir, readFile, readdir, rm, stat, statfs, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import path from 'node:path'
+import { createWatchService } from './watch.mjs'
+
+const { findWatch, ejectWatch } = createWatchService()
 
 const CALLBACK_PORT = 43821
 const CALLBACK_URL = `http://127.0.0.1:${CALLBACK_PORT}/callback`
@@ -337,40 +340,6 @@ async function runDownload(playlist, config) {
   }
   await Promise.all(Array.from({ length: Math.min(DOWNLOAD_CONCURRENCY, tracks.length) }, worker))
   return { transferred, total: tracks.length, failures, destination }
-}
-
-function ejectWatch(configuredPath = '') {
-  return findWatch(configuredPath).then((watch) => {
-    if (!watch) throw new Error('No mounted COROS watch found.')
-    return new Promise((resolve, reject) => {
-      const child = spawn('diskutil', ['eject', watch.path])
-      let output = ''
-      child.stdout.on('data', (chunk) => { output += chunk })
-      child.stderr.on('data', (chunk) => { output += chunk })
-      child.on('error', reject)
-      child.on('close', (code) => {
-        if (code === 0) resolve({ name: watch.name })
-        else reject(new Error(output.trim() || `Could not eject ${watch.name}.`))
-      })
-    })
-  })
-}
-
-async function findWatch(configuredPath = '') {
-  const mountedCandidates = (await readdir('/Volumes', { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && /coros|pace\s*\d*/i.test(entry.name))
-    .map((entry) => path.join('/Volumes', entry.name))
-  const candidates = [...new Set([configuredPath, ...mountedCandidates].filter(Boolean))]
-  for (const candidate of candidates) {
-    try {
-      await access(candidate)
-      const capacity = await statfs(candidate)
-      return { path: candidate, name: path.basename(candidate), freeBytes: capacity.bavail * capacity.bsize, totalBytes: capacity.blocks * capacity.bsize }
-    } catch {
-      // Try the next mounted volume.
-    }
-  }
-  return null
 }
 
 function registerIpc() {

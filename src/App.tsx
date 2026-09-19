@@ -76,9 +76,14 @@ function App() {
 
   async function detectWatch() {
     if (!bridge) return
-    const detected = await bridge.detectWatch(config.watchPath)
-    setWatch(detected)
-    setStatus(detected ? `${detected.name} is ready` : 'No mounted COROS volume found')
+    try {
+      const detected = await bridge.detectWatch(config.watchPath)
+      setWatch(detected)
+      setStatus(detected ? `${detected.name} is ready` : 'No mounted COROS volume found; choose its volume root in Settings')
+    } catch (error) {
+      setWatch(null)
+      setStatus(error instanceof Error ? error.message : String(error))
+    }
   }
 
   async function ejectWatch() {
